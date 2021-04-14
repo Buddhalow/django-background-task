@@ -1,11 +1,11 @@
-from .models import Task, datetime_now
+from models import Task, datetime_now
 
 import os
 import logging
 import sys
 from datetime import datetime, timedelta
 from django.db import transaction
-from importlib import import_module
+from django.utils.importlib import import_module
 
 
 class Tasks(object):
@@ -142,6 +142,7 @@ class DBTaskRunner(object):
 
         task.save()
 
+    @transaction.autocommit
     def get_task_to_run(self):
         tasks = Task.objects.find_available()[:5]
         for task in tasks:
@@ -151,6 +152,7 @@ class DBTaskRunner(object):
                 return locked_task
         return None
 
+    @transaction.autocommit
     def run_task(self, tasks, task):
         try:
             logging.info('Running %s', task)
@@ -181,7 +183,7 @@ class DBTaskRunner(object):
 class TaskProxy(object):
     def __init__(self, name, task_function, schedule, runner):
         self.name = name
-        self.task_function = task_function
+        self.now = self.task_function = task_function
         self.runner = runner
         self.schedule = TaskSchedule.create(schedule)
 

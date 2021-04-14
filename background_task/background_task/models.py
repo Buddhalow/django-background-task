@@ -5,10 +5,7 @@ from django.conf import settings
 from datetime import timedelta
 from hashlib import sha1
 import traceback
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from StringIO import StringIO
 import logging
 
 try:
@@ -37,7 +34,7 @@ class TaskManager(models.Manager):
 
     def unlocked(self, now):
         max_run_time = getattr(settings, 'MAX_RUN_TIME', 3600)
-        qs = self.get_queryset()
+        qs = self.get_query_set()
         expires_at = now - timedelta(seconds=max_run_time)
         unlocked = Q(locked_by=None) | Q(locked_at__lt=expires_at)
         return qs.filter(unlocked)

@@ -1,4 +1,3 @@
-from random import choice
 from django.core.management.base import BaseCommand
 import time
 from optparse import make_option
@@ -9,53 +8,42 @@ from background_task.tasks import tasks, autodiscover
 
 class Command(BaseCommand):
     LOG_LEVELS = ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG']
-
+    
     help = 'Run tasks that are scheduled to run on the queue'
-
-    def add_arguments(self, parser):
-           parser.add_argument(
-                '--duration',
+    option_list = BaseCommand.option_list + (
+            make_option('--duration',
                 action='store',
                 dest='duration',
-                type=int,
+                type='int',
                 default=0,
-                help='Run task for this many seconds (0 or less to run forever) - default is 0'
-           )
-           parser.add_argument(
-                '--sleep',
+                help='Run task for this many seconds (0 or less to run forever) - default is 0'),
+            make_option('--sleep',
                 action='store',
                 dest='sleep',
-                type=float,
+                type='float',
                 default=5.0,
-                help='Sleep for this many seconds before checking for new tasks (if none were found) - default is 5'
-           )
-           parser.add_argument(
-                '--log-file',
+                help='Sleep for this many seconds before checking for new tasks (if none were found) - default is 5'),
+            make_option('--log-file',
                 action='store',
                 dest='log_file',
-                help='Log file destination'
-           )
-           parser.add_argument(
-                '--log-std',
+                help='Log file destination'),
+            make_option('--log-std',
                 action='store_true',
                 dest='log_std',
-                help='Redirect stdout and stderr to the logging system'
-           )
-           parser.add_argument(
-                '--log-level',
+                help='Redirect stdout and stderr to the logging system'),            
+            make_option('--log-level',
                 action='store',
-                type=choice,
-                choices=Command.LOG_LEVELS,
+                type='choice',
+                choices=LOG_LEVELS,
                 dest='log_level',
-                help='Set logging level (%s)' % ', '.join(Command.LOG_LEVELS)
-           )
-
-
+                help='Set logging level (%s)' % ', '.join(LOG_LEVELS)),
+            )
+    
     def _configure_logging(self, log_level, log_file, log_std):
 
         if log_level:
             log_level = getattr(logging, log_level)
-
+        
         config = {}
         if log_level:
             config['level'] = log_level
